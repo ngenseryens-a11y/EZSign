@@ -424,7 +424,8 @@ function doDraw(e){
   const p0=points[len-3], p1=points[len-2], p2=points[len-1];
   const velocity=calcVelocity(p1,p2);
   const width=calcDynamicWidth(velocity, lastPressure);
-  const startMid=midPoint(p0,p1);
+  // 第一段線從落筆點 p0 本身畫起，銜接 startDraw 的落筆圓點，避免中間出現斷層的獨立黑點
+  const startMid = (len===3) ? p0 : midPoint(p0,p1);
   const endMid=midPoint(p1,p2);
 
   ctx.strokeStyle=penColor;
@@ -851,12 +852,11 @@ function makeSignatureWithWatermark(sigURL, callback){
     cx.save();
     cx.textAlign = 'right';
     cx.textBaseline = 'bottom';
-    // 上方：EZSign
-    cx.globalAlpha = 0.85;
+    // 上方：EZSign；下方：日期。文字採完全不透明，避免部分手機瀏覽器對半透明文字的
+    // 合成算圖異常，導致文字周圍出現非預期的灰白底色方塊
     cx.fillStyle = '#8b1a1a';
     cx.font = `bold ${titleSize}px sans-serif`;
     cx.fillText('EZSign', sigW - 8, sigH + wmHeight * 0.55);
-    // 下方：日期
     cx.fillStyle = '#333333';
     cx.font = `${dateSize}px sans-serif`;
     cx.fillText(dateStr, sigW - 8, sigH + wmHeight - 4);
